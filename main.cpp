@@ -5,36 +5,25 @@
 
 using std::string; using std::cout; using std::cin;
 
-class Number
-{
-public:
-    virtual void enter_number() {}
-    virtual bool is_the_number_correct() {}
-    virtual string to_binary () {}
-    virtual string to_decimal () {}
-    virtual string to_hexadecimal () {}
-};
-
-
-class Binary: public Number
+class Binary
 {
     string binary_number;
 
 public:
-    virtual void enter_number(bool we_have_number = false, string we_have_binary = "no") {
+    void enter_number(bool we_have_number = false, string we_have_binary = "no") {
         if (!(we_have_number)) {
             cout << "Please enter your binary number:" << '\n';
             cin >> binary_number;
         } else binary_number = we_have_binary;
     };
-    virtual bool is_the_number_correct(int num_of_digits) {
+    bool is_the_number_correct(int num_of_digits) {
         for (int i = 0; i < num_of_digits; i++)
         {
             if (binary_number[i] != '1' && binary_number[i] != '0') return false;
         }
         return true;
     };
-    virtual string to_decimal () {
+    string to_decimal () {
         int num_of_digits = binary_number.size();
         if (!is_the_number_correct(num_of_digits)) return "the binary number is not correct";
         // I thought it was less complex approach to include function for checking if number is
@@ -54,23 +43,23 @@ public:
     // I think direct approach in that case would be just unnecessary lines of code
 };
 
-class Decimal: public Number {
+class Decimal{
     string decimal_number;
 public:
     // because we are using Decimal class enter_number function for binary to hex conversion
     // we need additional parameter to specify which case we're at the moment
     // moreover if we have decimal after binary conversion we don't need the user to write down number
     // because I chose decimal_number to be Decimal private variable, I did this like that
-    virtual void enter_number(bool bin_to_hex_or_hex_to_bin = false, string we_have_decimal = "no") {
+    void enter_number(bool bin_to_hex_or_hex_to_bin = false, string we_have_decimal = "no") {
         if (!(bin_to_hex_or_hex_to_bin)) {
             cout << "Please enter your decimal number:" << '\n';
             cin >> decimal_number;
         } else decimal_number = we_have_decimal;
     };
 
-    virtual bool is_the_number_correct(bool* is_the_number_negative) { // checking and if correct preparing number
-                                        // by erasing - and + symbols
-                                        // and moreover checking if number is negative
+    bool is_the_number_correct(bool* is_the_number_negative) { // checking and if correct preparing number
+        // by erasing - and + symbols
+        // and moreover checking if number is negative
 
         int num_of_digits = decimal_number.length();
         for (int i = 0; i < num_of_digits; i++)
@@ -90,7 +79,7 @@ public:
     };
 
 
-    virtual string to_binary(bool is_decimal_negative = false, bool first_usage = true) {
+    string to_binary(bool is_decimal_negative = false, bool first_usage = true) {
 
         if (first_usage) if (!(is_the_number_correct(&is_decimal_negative))) return "the decimal number is not correct";
         //this function includes both positive and negative decimal number case
@@ -100,17 +89,17 @@ public:
         if (true_decimal == 1 && !(is_decimal_negative)) return "1";
         string new_number;
         while (true_decimal != 0) {
-                if (true_decimal % 2 == 1) new_number.append("1");
-                else new_number.append("0");
-                true_decimal = true_decimal / 2;
-            }
-            std::reverse(new_number.begin(), new_number.end());
-      if (is_decimal_negative)
+            if (true_decimal % 2 == 1) new_number.append("1");
+            else new_number.append("0");
+            true_decimal = true_decimal / 2;
+        }
+        std::reverse(new_number.begin(), new_number.end());
+        if (is_decimal_negative)
         {
-          return "\nPositive number("+ storage_for_later + "): 0" + new_number +
-                    "\n1's complement: " + get_complement("0"+new_number, "1s_bin") +
-                    "\n2's complement: " + get_complement("0"+new_number, "2s_bin");
-          // get_complement() is Decimal class method that returns each binary complement
+            return "\nPositive number("+ storage_for_later + "): 0" + new_number +
+                   "\n1's complement: " + get_complement("0"+new_number, "1s_bin") +
+                   "\n2's complement: " + get_complement("0"+new_number, "2s_bin");
+            // get_complement() is Decimal class method that returns each binary complement
 
         }
         return new_number;
@@ -123,8 +112,8 @@ public:
         if ("1s_bin" == which_one)
         {
             for (int i = 0; i < num_of_digits; i++) // to get 1's complement we simply
-                                                    // need to switch each one to zero and likewise
-                                                    // including sign char 0 in binary positive number
+                // need to switch each one to zero and likewise
+                // including sign char 0 in binary positive number
             {
                 if (binary_or_hex_positive[i] == '0') complement_result.append("1");
                 else complement_result.append("0");
@@ -177,8 +166,50 @@ public:
         // we would like to call this function multiply times with consequently lower value each time
         // there's loop for that in to_hexadecimal func
 
-            if (decimal_number > 9 && decimal_number < 16) {
-                switch (decimal_number) {
+        if (decimal_number > 9 && decimal_number < 16) {
+            switch (decimal_number) {
+                case 10:
+                    new_number.append("A");
+                    break;
+                case 11:
+                    new_number.append("B");
+                    break;
+                case 12:
+                    new_number.append("C");
+                    break;
+                case 13:
+                    new_number.append("D");
+                    break;
+                case 14:
+                    new_number.append("E");
+                    break;
+                case 15:
+                    new_number.append("F");
+                    break;
+            }
+            get_16_lowest_divider(decimal_number/16, new_number);
+        }
+        else if (decimal_number > 0) {
+            new_number.append(std::to_string(decimal_number));
+            get_16_lowest_divider(decimal_number/16, new_number);
+        }
+    }
+
+    string to_hexadecimal(){
+        bool is_the_number_negative;
+        if (!is_the_number_correct(&is_the_number_negative)) return "the decimal number is not correct";
+        int true_decimal = std::stoi(decimal_number);
+        if (true_decimal == 0) return "0";
+        string new_number;
+
+        while (true_decimal > 0) { // it uses recursion function (check few lines above)
+            // to find all the dividers of dec/16 and writes
+            // them in hex language
+            get_16_lowest_divider(true_decimal, new_number);
+            int division_rest = true_decimal % 16;
+
+            if (division_rest > 9) { // we also need to write down the rest from the division
+                switch (division_rest) {
                     case 10:
                         new_number.append("A");
                         break;
@@ -198,52 +229,10 @@ public:
                         new_number.append("F");
                         break;
                 }
-                get_16_lowest_divider(decimal_number/16, new_number);
-            }
-            else if (decimal_number > 0) {
-                new_number.append(std::to_string(decimal_number));
-                get_16_lowest_divider(decimal_number/16, new_number);
-            }
-    }
-
-    virtual string to_hexadecimal(){
-        bool is_the_number_negative;
-        if (!is_the_number_correct(&is_the_number_negative)) return "the decimal number is not correct";
-        int true_decimal = std::stoi(decimal_number);
-        if (true_decimal == 0) return "0";
-        string new_number;
-
-            while (true_decimal > 0) { // it uses recursion function (check few lines above)
-                                        // to find all the dividers of dec/16 and writes
-                                        // them in hex language
-                get_16_lowest_divider(true_decimal, new_number);
-                int division_rest = true_decimal % 16;
-
-                if (division_rest > 9) { // we also need to write down the rest from the division
-                    switch (division_rest) {
-                        case 10:
-                            new_number.append("A");
-                            break;
-                        case 11:
-                            new_number.append("B");
-                            break;
-                        case 12:
-                            new_number.append("C");
-                            break;
-                        case 13:
-                            new_number.append("D");
-                            break;
-                        case 14:
-                            new_number.append("E");
-                            break;
-                        case 15:
-                            new_number.append("F");
-                            break;
-                    }
-                } else new_number.append(std::to_string(division_rest));
-                true_decimal = true_decimal/16;
-            }
-            if (is_the_number_negative) new_number.append("-");
+            } else new_number.append(std::to_string(division_rest));
+            true_decimal = true_decimal/16;
+        }
+        if (is_the_number_negative) new_number.append("-");
         std::reverse(new_number.begin(), new_number.end()); // because we wrote them right-to-left
         return new_number;
     }
@@ -251,19 +240,19 @@ public:
 
 };
 
-class Hexadecimal: public Number {
+class Hexadecimal{
     string hex_number;
 
 public:
-    virtual void enter_number(bool we_have_string = false, string what_we_have = "nothing") {
-       if (!we_have_string){
-           cout << "Please enter your hexadecimal number:" << '\n';
-           cin >> hex_number;
-       }
-       else hex_number = what_we_have;
+   void enter_number(bool we_have_string = false, string what_we_have = "nothing") {
+        if (!we_have_string){
+            cout << "Please enter your hexadecimal number:" << '\n';
+            cin >> hex_number;
+        }
+        else hex_number = what_we_have;
     };
 
-    virtual bool is_the_number_correct(int num_of_digits) {
+    bool is_the_number_correct(int num_of_digits) {
 
         for (int i = 0; i < num_of_digits; i++)
         {
@@ -274,7 +263,7 @@ public:
     };
     // don't have to_binary function since its hex->dec->bin
 
-    virtual string to_decimal() {
+    string to_decimal() {
         int num_of_digits = hex_number.size();
         if (!is_the_number_correct(num_of_digits)) return "the hexadecimal number is not correct";
         int new_number = 0;
@@ -346,7 +335,7 @@ public:
             repeat_the_program();
         }
         goodbye();
-        }
+    }
     void menu()
     {
         if (conversion_type == "bin_dec") {
@@ -377,9 +366,10 @@ public:
             bool decimal_negative;
             dec.is_the_number_correct(&decimal_negative);
             to_hex = dec.to_hexadecimal();
-            cout << "Your hexadecimal number: " << to_hex << '\n';
-            if (decimal_negative) { // getting 1's and 2's complement of hexadecimal number
-                to_hex.erase(0,1); // getting rid of the minus
+            to_hex.erase(0,1); // getting rid of the minus
+           if (!(decimal_negative)) cout << "Your hexadecimal number: " << to_hex << '\n';
+            else { // getting 1's and 2's complement of hexadecimal number
+                cout << "Your hexadecimal number (positive): " << to_hex << '\n';
                 string one_s_hex = dec.get_complement(to_hex, "1s_hex");
                 cout << "1's complement: " << one_s_hex << '\n';
                 hex.enter_number(true, one_s_hex);
